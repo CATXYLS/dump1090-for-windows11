@@ -6,11 +6,19 @@ jobs:
   build:
     name: Build dump1090-fa
     strategy:
+      fail-fast: false
       matrix:
         image:
           - ubuntu-24.04
           - ubuntu-24.04-arm
+        compiler:
+          - gcc-10
+          - gcc-12
+          - gcc-14
+          - clang-20
     runs-on: ${{ matrix.image }}
+    env:
+      CC: ${{ matrix.compiler }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -19,7 +27,7 @@ jobs:
       - name: Install build prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends debhelper librtlsdr-dev libbladerf-dev libhackrf-dev liblimesuite-dev libsoapysdr-dev libusb-1.0-0-dev pkg-config libncurses5-dev
+          sudo apt-get install -y --no-install-recommends debhelper librtlsdr-dev libbladerf-dev libhackrf-dev liblimesuite-dev libsoapysdr-dev libusb-1.0-0-dev pkg-config libncurses5-dev ${{ matrix.compiler }}
       - name: Build it
         run: |
           make RTLSDR=yes BLADERF=yes HACKRF=yes LIMESDR=yes SOAPYSDR=yes all
