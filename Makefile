@@ -6,7 +6,7 @@ CFLAGS ?= -O3 -g
 DUMP1090_CFLAGS := -std=c11 -fno-common -Wall -Wmissing-declarations -Werror -Wformat-signedness -W
 DUMP1090_CPPFLAGS := -I. -D_POSIX_C_SOURCE=200112L -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
-LIBS = -lpthread -lm
+LIBS = -lpthread -lm -lws2_32
 SDR_OBJ = cpu.o sdr.o fifo.o sdr_ifile.o dsp/helpers/tables.o
 
 # Try to autodetect available libraries via pkg-config if no explicit setting was used
@@ -52,7 +52,7 @@ ARCH ?= $(BUILD_ARCH)
 
 ifeq ($(UNAME), Linux)
   DUMP1090_CPPFLAGS += -D_DEFAULT_SOURCE
-  LIBS += -lrt
+  # LIBS += -lrt   # not needed for Windows cross-compile
   LIBS_USB += -lusb-1.0
   LIBS_CURSES := -lncurses
   CPUFEATURES ?= yes
@@ -201,7 +201,7 @@ else
     DUMP1090_CPPFLAGS += -DSTARCH_MIX_GENERIC
   endif
 endif
-all: showconfig dump1090 view1090 starch-benchmark
+all: showconfig dump1090
 
 ALL_CCFLAGS := $(CPPFLAGS) $(DUMP1090_CPPFLAGS) $(CFLAGS) $(DUMP1090_CFLAGS)
 
@@ -222,8 +222,8 @@ showconfig:
 %.o: %.c *.h
 	$(CC) $(ALL_CCFLAGS) -c $< -o $@
 
-dump1090: dump1090.o anet.o interactive.o mode_ac.o mode_s.o comm_b.o net_io.o crc.o demod_2400.o stats.o cpr.o icao_filter.o track.o util.o convert.o ais_charset.o adaptive.o $(SDR_OBJ) $(COMPAT) $(CPUFEATURES_OBJS) $(STARCH_OBJS)
-	$(CC) -g -o $@ $^ $(LDFLAGS) $(LIBS) $(LIBS_SDR) $(LIBS_CURSES)
+dump1090: dump1090.o anet.o mode_ac.o mode_s.o comm_b.o net_io.o crc.o demod_2400.o stats.o cpr.o icao_filter.o track.o util.o convert.o ais_charset.o adaptive.o $(SDR_OBJ) $(COMPAT) $(CPUFEATURES_OBJS) $(STARCH_OBJS)
+	$(CC) -g -o $@ $^ $(LDFLAGS) $(LIBS) $(LIBS_SDR)
 
 view1090: view1090.o anet.o interactive.o mode_ac.o mode_s.o comm_b.o net_io.o crc.o stats.o cpr.o icao_filter.o track.o util.o ais_charset.o sdr_stub.o $(COMPAT)
 	$(CC) -g -o $@ $^ $(LDFLAGS) $(LIBS) $(LIBS_CURSES)
