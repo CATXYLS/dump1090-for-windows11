@@ -47,6 +47,13 @@
 //   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#ifdef _WIN32
+#define SIGPIPE 13  // Windows 没有 SIGPIPE，给它一个值
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+#endif
+
 #include "dump1090.h"
 
 /* for PRIX64 */
@@ -261,7 +268,9 @@ struct net_service *makeFaCmdInputService(void)
 void modesInitNet(void) {
     struct net_service *s;
 
+    #ifndef _WIN32
     signal(SIGPIPE, SIG_IGN);
+    #endif
     Modes.clients = NULL;
     Modes.services = NULL;
 
@@ -2132,6 +2141,7 @@ char *generateHistoryJson(const char *url_path, int *len)
     return strdup(Modes.json_aircraft_history[history_index].content);
 }
 
+__attribute__((unused))
 static void ratelimitWriteError(const char *format, ...)
 {
     static uint64_t lastError = 0;
@@ -2159,6 +2169,8 @@ static void ratelimitWriteError(const char *format, ...)
 // Write JSON to file
 void writeJsonToFile(const char *file, char * (*generator) (const char *,int*))
 {
+    (void)file;
+    (void)generator;
 #ifndef _WIN32
     char pathbuf[PATH_MAX];
     char tmppath[PATH_MAX];
