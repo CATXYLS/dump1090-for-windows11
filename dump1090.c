@@ -60,6 +60,13 @@ struct _Modes Modes;
 
 static void log_with_timestamp(const char *format, ...) __attribute__((format (printf, 1, 2) ));
 
+#ifdef _WIN32
+// Stub functions to replace interactive mode on Windows
+void interactiveInit(void) {}
+void interactiveShowData(void) {}
+void interactiveCleanup(void) {}
+#endif
+
 static void log_with_timestamp(const char *format, ...)
 {
     char timebuf[128];
@@ -594,6 +601,14 @@ static void applyNetDefaults()
 
 int main(int argc, char **argv) {
     int j;
+
+#ifdef _WIN32
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        fprintf(stderr, "WSAStartup failed\n");
+        return 1;
+    }
+#endif
 
     // Set sane defaults
     modesInitConfig();
