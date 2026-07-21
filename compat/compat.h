@@ -13,7 +13,25 @@
 #  define NONSTRING /* nothing */
 #endif
 
-#if defined(__APPLE__)
+/*
+ * Endian handling
+ */
+
+#if defined(_WIN32)
+/* MinGW/Windows: provide our own byte swap and endian conversion */
+#include <stdlib.h>
+#define bswap_16(x) _byteswap_ushort(x)
+#define bswap_32(x) _byteswap_ulong(x)
+#define bswap_64(x) _byteswap_uint64(x)
+
+#define le16toh(x) (x)
+#define le32toh(x) (x)
+#define le64toh(x) (x)
+#define htole16(x) (x)
+#define htole32(x) (x)
+#define htole64(x) (x)
+
+#elif defined(__APPLE__)
 
 /*
  * Mach endian conversion
@@ -30,7 +48,7 @@
 #elif defined(__FreeBSD__)
 #include <sys/endian.h>
 
-#else // other platforms
+#else // other platforms (Linux etc.)
 
 # include <endian.h>
 
