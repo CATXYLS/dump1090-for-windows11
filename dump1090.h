@@ -50,6 +50,11 @@
 #ifndef __DUMP1090_H
 #define __DUMP1090_H
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
 // Default version number, if not overriden by the Makefile
 #ifndef MODES_DUMP1090_VERSION
 # define MODES_DUMP1090_VERSION     "unknown"
@@ -76,7 +81,9 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <sys/stat.h>
+#ifndef _WIN32
 #include <sys/ioctl.h>
+#endif
 #include <time.h>
 #include <limits.h>
 #include <strings.h>
